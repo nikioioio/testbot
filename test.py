@@ -63,8 +63,9 @@ def report(message):
     global year
     year = message.text
 
-    func_test(year).write_image("fig1.jpeg")
-    with open('fig1.jpeg','rb') as f:
+    func_test(year).savefig("fig1.png")
+    func_test(year).close()
+    with open('fig1.png','rb') as f:
         bot.send_photo(message.chat.id,f)
 
 
@@ -77,53 +78,26 @@ def func_test(year):
         '8e0768211f6b747c0db42a9ce9a0937dafcbd8b2/'
         'indicators.csv')
     t = df[df['Year'] ==int(year)]
-    t1 = t.groupby('Country Name')['Value'].mean()
+    t1 = t.groupby('Country Name')['Value'].mean()[:10]
     dt = pd.DataFrame(t1)
-    a = dt.to_dict()
-    print(a['Value'])
-    # x = [{} for x in range(len(t1))]
-    # print(x)
 
-    trace = []
+    fig, ax = plt.subplots()
 
-    for i in range(len(dt['Value'])):
-        trace.append(go.Bar(
+    ax.bar([x for x in range(len(t1))], [y for y in t1])
+    ax.set_xticks(np.arange(len(t1)))
+    labels = [x for x in t1.index]
+    print(labels)
+    ax.set_xticklabels(labels, rotation=90)
 
-            y=[dt['Value'][i]],
-            text=[dt.index[i]],
-            name=dt.index[i]
+    # # plt.show()
+    #
+    # plt.savefig('foo.png')
+    # plt.close()
 
-        ))
-
-    fig = go.Figure(
-
-        data=trace
-
-    )
-
-    return fig
+    return plt
 
 
-def get_fig():
-    N = 100
-    x = np.random.rand(N)
-    y = np.random.rand(N)
-    colors = np.random.rand(N)
-    sz = np.random.rand(N) * 30
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=x,
-        y=y,
-        mode="markers",
-        marker=go.scatter.Marker(
-            size=sz,
-            color=colors,
-            opacity=0.6,
-            colorscale="Viridis"
-        )
-    ))
-    return fig
 
 bot.polling(none_stop=True, interval=0)
 
